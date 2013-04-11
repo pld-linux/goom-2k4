@@ -12,6 +12,7 @@ Group:		Applications/Graphics
 Source0:	http://downloads.sourceforge.net/goom/%{name}-%{version}-src.tar.gz
 # Source0-md5:	8100dd07e0c6784fdf079eeaa53a5c7f
 Patch0:		%{name}-link.patch
+Patch1:		%{name}-format.patch
 URL:		http://goom.sourceforge.net/
 BuildRequires:	SDL-devel >= 1.2.0
 BuildRequires:	autoconf
@@ -79,6 +80,7 @@ Wtyczka wizualizacji Goom 2 dla XMMS-a.
 %prep
 %setup -q -n goom2k4-%{version}
 %patch0 -p1
+%patch1 -p1
 
 %build
 %{__libtoolize}
