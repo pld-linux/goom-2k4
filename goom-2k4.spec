@@ -6,7 +6,7 @@ Summary:	GOOM! audio visualization version 2
 Summary(pl.UTF-8):	Wizualizacja dźwięku GOOM! wersja 2
 Name:		goom-2k4
 Version:	0
-Release:	1
+Release:	2
 License:	LGPL
 Group:		Applications/Graphics
 Source0:	http://downloads.sourceforge.net/goom/%{name}-%{version}-src.tar.gz
