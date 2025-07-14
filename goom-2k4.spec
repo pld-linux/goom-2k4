@@ -79,8 +79,8 @@ Wtyczka wizualizacji Goom 2 dla XMMS-a.
 
 %prep
 %setup -q -n goom2k4-%{version}
-%patch0 -p1
-%patch1 -p1
+%patch -P0 -p1
+%patch -P1 -p1
 
 %build
 %{__libtoolize}
