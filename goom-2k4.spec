@@ -1,7 +1,13 @@
 #
 # Conditional build:
 %bcond_without	static_libs	# static library
-#
+%bcond_without	sdl		# SDL/GTK+ 1.x based program
+%bcond_with	xmms		# XMMS plugin
+
+%if %{without xmms}
+# disabled in configure if no XMMS
+%undefine	with_sdl
+%endif
 Summary:	GOOM! audio visualization version 2
 Summary(pl.UTF-8):	Wizualizacja dźwięku GOOM! wersja 2
 Name:		goom-2k4
@@ -9,17 +15,19 @@ Version:	0
 Release:	3
 License:	LGPL
 Group:		Applications/Graphics
-Source0:	http://downloads.sourceforge.net/goom/%{name}-%{version}-src.tar.gz
+Source0:	https://downloads.sourceforge.net/goom/%{name}-%{version}-src.tar.gz
 # Source0-md5:	8100dd07e0c6784fdf079eeaa53a5c7f
 Patch0:		%{name}-link.patch
 Patch1:		%{name}-format.patch
-URL:		http://goom.sourceforge.net/
-BuildRequires:	SDL-devel >= 1.2.0
+URL:		https://goom.sourceforge.net/
+%{?with_sdl:BuildRequires:	SDL-devel >= 1.2.0}
 BuildRequires:	autoconf
 BuildRequires:	automake
-BuildRequires:	gtk+-devel
+%if %{with sdl} || %{with xmms}
+BuildRequires:	gtk+-devel >= 1
+%endif
 BuildRequires:	libtool
-BuildRequires:	xmms-devel >= 0.9.5.1
+%{?with_xmms:BuildRequires:	xmms-devel >= 0.9.5.1}
 Requires:	libgoom2 = %{version}-%{release}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
@@ -88,6 +96,8 @@ Wtyczka wizualizacji Goom 2 dla XMMS-a.
 %{__autoconf}
 %{__automake}
 %configure \
+	%{!?with_sdl:ac_cv_path_SDL_CONFIG=no} \
+	%{!?with_xmms:ac_cv_path_XMMS_CONFIG=no} \
 	%{?with_static_libs:--enable-static}
 %{__make}
 
@@ -97,8 +107,14 @@ rm -rf $RPM_BUILD_ROOT
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT
 
+%if %{with xmms}
 %{__rm} $RPM_BUILD_ROOT%{xmms_visualization_plugindir}/*.la
-%{?with_static_libs:%{__rm} $RPM_BUILD_ROOT%{xmms_visualization_plugindir}/*.a}
+%if %{with static_libs}
+%{__rm} $RPM_BUILD_ROOT%{xmms_visualization_plugindir}/*.a
+%endif
+%endif
+# obsoleted by pkg-config
+%{__rm} $RPM_BUILD_ROOT%{_libdir}/libgoom2.la
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -106,20 +122,21 @@ rm -rf $RPM_BUILD_ROOT
 %post	-n libgoom2 -p /sbin/ldconfig
 %postun	-n libgoom2 -p /sbin/ldconfig
 
+%if %{with sdl}
 %files
 %defattr(644,root,root,755)
-%doc AUTHORS COPYING ChangeLog README
 %attr(755,root,root) %{_bindir}/goom2
+%endif
 
 %files -n libgoom2
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libgoom2.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/libgoom2.so.0
+%doc AUTHORS COPYING ChangeLog README
+%{_libdir}/libgoom2.so.*.*.*
+%ghost %{_libdir}/libgoom2.so.0
 
 %files -n libgoom2-devel
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/libgoom2.so
-%{_libdir}/libgoom2.la
+%{_libdir}/libgoom2.so
 %{_includedir}/goom
 %{_pkgconfigdir}/libgoom2.pc
 
@@ -129,6 +146,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/libgoom2.a
 %endif
 
+%if %{with xmms}
 %files -n xmms-visualization-goom2
 %defattr(644,root,root,755)
-%attr(755,root,root) %{xmms_visualization_plugindir}/libxmmsgoom2.so
+%{xmms_visualization_plugindir}/libxmmsgoom2.so
+%endif
